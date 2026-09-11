@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Notification System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- OneSignal Web SDK v16 -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+<style>
+:root{
+    --primary:#6d5dfc;
+    --primary2:#8b5cf6;
+    --dark:#15172b;
+    --muted:#667085;
+    --bg:#f6f7fb;
+}
+
+*{
+    box-sizing:border-box
+}
+
+body{
+    background:linear-gradient(
+        135deg,
+        #f7f5ff 0%,
+        #f8fbff 52%,
+        #f7f7fb 100%
+    )!important;
+    color:#171923;
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,
+    "Segoe UI",sans-serif;
+}
+
+.navbar{
+    background:linear-gradient(
+        100deg,
+        #17192f,
+        #34306d
+    )!important;
+    box-shadow:0 8px 24px rgba(31,35,70,.16);
+}
+
+.navbar-brand{
+    font-weight:700;
+    letter-spacing:.2px
+}
+
+.card{
+    border:0!important;
+    border-radius:18px!important;
+    box-shadow:0 14px 40px rgba(30,35,70,.10)!important;
+    overflow:hidden
+}
+
+.form-control,
+.form-select{
+    border:1px solid #dfe3ef;
+    border-radius:10px;
+    padding:.72rem .85rem
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 .2rem rgba(109,93,252,.13)
+}
+
+.btn{
+    border-radius:10px;
+    font-weight:600;
+    transition:.18s ease
+}
+
+.btn:hover{
+    transform:translateY(-1px)
+}
+
+.btn-primary{
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary2)
+    );
+    border:0
+}
+
+.btn-dark{
+    background:#1d2038;
+    border:0
+}
+
+.text-muted{
+    color:var(--muted)!important
+}
+
+.badge{
+    border-radius:999px;
+    padding:.42em .7em
+}
+
+.auth-wrap{
+    min-height:calc(100vh - 64px);
+    display:flex;
+    align-items:center;
+    padding:40px 15px
+}
+
+.auth-card{
+    max-width:470px;
+    margin:auto
+}
+
+.auth-header{
+    background:linear-gradient(
+        135deg,
+        #6d5dfc,
+        #8b5cf6
+    );
+    color:#fff;
+    padding:28px;
+    text-align:center
+}
+
+.auth-header h2{
+    font-weight:800;
+    margin:0
+}
+
+.auth-body{
+    padding:28px
+}
+
+.field-label{
+    font-weight:600;
+    font-size:.9rem;
+    margin-bottom:7px
+}
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark">
+
+    <div class="container">
+
+        <span class="navbar-brand">
+            🔔 Notification Management System
+        </span>
+
+    </div>
+
+</nav>
+
+
+<div class="auth-wrap">
+
+    <div class="container">
+
+        <div class="card auth-card">
+
+            <div class="auth-header">
+
+                <div style="font-size:32px">
+                    👋
+                </div>
+
+                <h2>
+                    User Login
+                </h2>
+
+                <div
+                    style="
+                        opacity:.85;
+                        font-size:.9rem;
+                        margin-top:6px
+                    "
+                >
+                    Sign in to trigger your notifications
+                </div>
+
+            </div>
+
+
+            <div class="auth-body">
+
+                <div id="message"></div>
+
+
+                <!-- Web Push -->
+
+                <div class="mb-3">
+
+                    <button
+                        type="button"
+                        id="enablePushButton"
+                        class="btn btn-outline-primary w-100"
+                        disabled
+                    >
+                        Initializing Web Push...
+                    </button>
+
+                    <small
+                        class="text-muted d-block mt-2"
+                        id="pushStatus"
+                    >
+                        Loading OneSignal...
+                    </small>
+
+                </div>
+
+
+                <!-- Login Form -->
+
+                <form id="loginForm">
+
+                    <div class="mb-3">
+
+                        <label class="field-label">
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            placeholder="Enter username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="field-label">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
+                            placeholder="Enter password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="field-label">
+                            WhatsApp Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="phone_number"
+                            class="form-control"
+                            placeholder="Example: 919876543210"
+                        >
+
+                        <small class="text-muted">
+                            Include country code, without + sign.
+                        </small>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="field-label">
+                            OneSignal Subscription ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="subscription_id"
+                            class="form-control"
+                            placeholder="Click Enable Web Push"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark w-100"
+                        id="loginButton"
+                    >
+                        Login
+                    </button>
+
+                </form>
+
+
+                <div class="text-center mt-3">
+
+                    <a
+                        href="/"
+                        class="text-decoration-none"
+                    >
+                        ← Back to Home
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ===========================
+   ONE SIGNAL
+=========================== */
+
+const ONE_SIGNAL_APP_ID =
+    "{{ onesignal_app_id|escapejs }}";
+
+
+let oneSignalReady = false;
+
+let oneSignalInstance = null;
+
+
+/* ===========================
+   CSRF TOKEN
+=========================== */
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (
+        document.cookie &&
+        document.cookie !== ""
+    ) {
+
+        const cookies =
+            document.cookie.split(";");
+
+        for (
+            let cookie of cookies
+        ) {
+
+            cookie = cookie.trim();
+
+            if (
+                cookie.startsWith(
+                    name + "="
+                )
+            ) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+
+const csrfToken =
+    getCookie("csrftoken");
+
+
+/* ===========================
+   ONESIGNAL DEFERRED
+=========================== */
+
+window.OneSignalDeferred =
+    window.OneSignalDeferred || [];
+
+
+/* ===========================
+   PUSH STATUS
+=========================== */
+
+function setPushStatus(
+    message,
+    success = false,
+    error = false
+) {
+
+    const status =
+        document.getElementById(
+            "pushStatus"
+        );
+
+
+    status.textContent = message;
+
+
+    if (success) {
+
+        status.className =
+            "text-success d-block mt-2";
+
+    } else if (error) {
+
+        status.className =
+            "text-danger d-block mt-2";
+
+    } else {
+
+        status.className =
+            "text-muted d-block mt-2";
+    }
+}
+
+
+/* ===========================
+   SET SUBSCRIPTION ID
+=========================== */
+
+function setSubscriptionId(id) {
+
+    if (id) {
+
+        document.getElementById(
+            "subscription_id"
+        ).value = id;
+    }
+}
+
+
+/* ===========================
+   INITIALIZE ONESIGNAL
+=========================== */
+
+window.OneSignalDeferred.push(
+    async function (OneSignal) {
+
+        try {
+
+            oneSignalInstance =
+                OneSignal;
+
+
+            await OneSignal.init({
+
+                appId:
+                    ONE_SIGNAL_APP_ID,
+
+                allowLocalhostAsSecureOrigin:
+                    true,
+
+                serviceWorkerPath:
+                    "/OneSignalSDKWorker.js",
+
+                serviceWorkerParam: {
+                    scope: "/"
+                }
+
+            });
+
+
+            oneSignalReady = true;
+
+
+            const button =
+                document.getElementById(
+                    "enablePushButton"
+                );
+
+
+            button.disabled = false;
+
+            button.textContent =
+                "Enable Web Push Notifications";
+
+
+            const existingId =
+                OneSignal
+                    .User
+                    .PushSubscription
+                    .id;
+
+
+            if (existingId) {
+
+                setSubscriptionId(
+                    existingId
+                );
+
+
+                button.textContent =
+                    "Web Push Enabled";
+
+
+                setPushStatus(
+                    "Web Push is already enabled.",
+                    true
+                );
+
+            } else {
+
+                setPushStatus(
+                    "OneSignal ready. Click the button to enable Web Push."
+                );
+            }
+
+
+            console.log(
+                "OneSignal initialized successfully."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "OneSignal initialization error:",
+                error
+            );
+
+
+            setPushStatus(
+                "OneSignal could not initialize. Check the browser Console.",
+                false,
+                true
+            );
+
+
+            const button =
+                document.getElementById(
+                    "enablePushButton"
+                );
+
+
+            button.disabled = true;
+
+            button.textContent =
+                "Web Push Unavailable";
+        }
+
+    }
+);
+
+
+/* ===========================
+   ENABLE WEB PUSH
+=========================== */
+
+document
+    .getElementById(
+        "enablePushButton"
+    )
+    .addEventListener(
+        "click",
+        async function () {
+
+            const button = this;
+
+
+            button.disabled = true;
+
+            button.textContent =
+                "Enabling Web Push...";
+
+
+            try {
+
+                if (
+                    !oneSignalReady ||
+                    !oneSignalInstance
+                ) {
+
+                    throw new Error(
+                        "OneSignal has not initialized yet. Please refresh the page and wait a few seconds."
+                    );
+                }
+
+
+                const supported =
+                    await oneSignalInstance
+                        .Notifications
+                        .isPushSupported();
+
+
+                if (!supported) {
+
+                    throw new Error(
+                        "This browser does not support Web Push notifications."
+                    );
+                }
+
+
+                await oneSignalInstance
+                    .Notifications
+                    .requestPermission();
+
+
+                let subscriptionId =
+                    oneSignalInstance
+                        .User
+                        .PushSubscription
+                        .id;
+
+
+                for (
+                    let i = 0;
+                    i < 15 &&
+                    !subscriptionId;
+                    i++
+                ) {
+
+                    await new Promise(
+                        resolve =>
+                            setTimeout(
+                                resolve,
+                                1000
+                            )
+                    );
+
+
+                    subscriptionId =
+                        oneSignalInstance
+                            .User
+                            .PushSubscription
+                            .id;
+                }
+
+
+                if (!subscriptionId) {
+
+                    const permission =
+                        oneSignalInstance
+                            .Notifications
+                            .permission;
+
+
+                    if (
+                        permission === false
+                    ) {
+
+                        throw new Error(
+                            "Browser notification permission was denied. Allow notifications and try again."
+                        );
+                    }
+
+
+                    throw new Error(
+                        "Subscription ID was not generated. Please allow browser notifications and try again."
+                    );
+                }
+
+
+                setSubscriptionId(
+                    subscriptionId
+                );
+
+
+                /* ===========================
+                   SAVE SUCCESSFULLY
+                =========================== */
+
+                setPushStatus(
+                    "Web Push enabled successfully.",
+                    true
+                );
+
+
+                button.textContent =
+                    "Web Push Enabled";
+
+
+                /* ===========================
+                   SAVE SUBSCRIPTION
+                =========================== */
+
+                const saveResponse =
+                    await fetch(
+                        "/api/notifications/push/subscribe/",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRFToken":
+                                    csrfToken
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    subscription_id:
+                                        subscriptionId,
+
+                                    player_id:
+                                        subscriptionId
+                                })
+                        }
+                    );
+
+
+                const saveData =
+                    await saveResponse.json();
+
+
+                if (
+                    !saveResponse.ok
+                ) {
+
+                    console.error(
+                        "Subscription save failed:",
+                        saveData
+                    );
+
+
+                    setPushStatus(
+                        "Push enabled, but subscription could not be saved to the server.",
+                        false,
+                        true
+                    );
+
+                } else {
+
+                    console.log(
+                        "Subscription saved:",
+                        saveData
+                    );
+
+
+                    setPushStatus(
+                        "Web Push enabled and subscription saved successfully.",
+                        true
+                    );
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Web Push Error:",
+                    error
+                );
+
+
+                setPushStatus(
+                    error.message ||
+                    "Unable to enable Web Push.",
+                    false,
+                    true
+                );
+
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Enable Web Push Notifications";
+            }
+
+        }
+    );
+
+
+/* ===========================
+   LOGIN
+=========================== */
+
+document
+    .getElementById("loginForm")
+    .addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const username =
+                document
+                    .getElementById(
+                        "username"
+                    )
+                    .value
+                    .trim();
+
+
+            const password =
+                document
+                    .getElementById(
+                        "password"
+                    )
+                    .value;
+
+
+            const phoneNumber =
+                document
+                    .getElementById(
+                        "phone_number"
+                    )
+                    .value
+                    .trim();
+
+
+            const subscriptionId =
+                document
+                    .getElementById(
+                        "subscription_id"
+                    )
+                    .value
+                    .trim();
+
+
+            const messageBox =
+                document.getElementById(
+                    "message"
+                );
+
+
+            const loginButton =
+                document.getElementById(
+                    "loginButton"
+                );
+
+
+            messageBox.innerHTML = "";
+
+
+            loginButton.disabled = true;
+
+            loginButton.textContent =
+                "Logging in...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/login/",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRFToken":
+                                    csrfToken
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    username:
+                                        username,
+
+                                    password:
+                                        password,
+
+                                    phone_number:
+                                        phoneNumber,
+
+                                    subscription_id:
+                                        subscriptionId
+                                })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    response.ok &&
+                    data.success === true
+                ) {
+
+                    messageBox.innerHTML = `
+
+                        <div class="alert alert-success">
+
+                            ${
+                                data.message ||
+                                "Login successful."
+                            }
+
+                        </div>
+
+                    `;
+
+
+                    console.log(
+                        "Notification Result:",
+                        data.notifications
+                    );
+
+
+                } else {
+
+                    messageBox.innerHTML = `
+
+                        <div class="alert alert-danger">
+
+                            ${
+                                data.message ||
+                                "Login failed."
+                            }
+
+                        </div>
+
+                    `;
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login Error:",
+                    error
+                );
+
+
+                messageBox.innerHTML = `
+
+                    <div class="alert alert-danger">
+
+                        Something went wrong.
+                        Please try again.
+
+                    </div>
+
+                `;
+            }
+
+
+            loginButton.disabled = false;
+
+            loginButton.textContent =
+                "Login";
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
